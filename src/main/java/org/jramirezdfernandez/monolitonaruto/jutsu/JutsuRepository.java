@@ -1,4 +1,4 @@
-package org.jramirezdfernandez.monolitonaruto.jutsus;
+package org.jramirezdfernandez.monolitonaruto.jutsu;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;

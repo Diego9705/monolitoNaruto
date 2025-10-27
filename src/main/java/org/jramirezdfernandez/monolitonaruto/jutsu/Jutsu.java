@@ -1,11 +1,8 @@
-package org.jramirezdfernandez.monolitonaruto.jutsus;
+package org.jramirezdfernandez.monolitonaruto.jutsu;
 
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.jramirezdfernandez.monolitonaruto.ninja.Ninja;
-
-import java.util.List;
 
 @Entity
 @Getter

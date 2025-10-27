@@ -1,10 +1,11 @@
-package org.jramirezdfernandez.monolitonaruto.jutsus;
+package org.jramirezdfernandez.monolitonaruto.jutsu;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -16,17 +17,24 @@ public class JutsuController {
 
     @GetMapping
     public List<Jutsu> getAllJutsus() {
+
         return jutsuRepository.findAll();
-    }
-    @GetMapping("/{id}")
-    public Jutsu getJutsuById(@PathVariable Long id) {
-        return jutsuRepository.findById(id).get();
+
     }
 
-    @GetMapping("/crear/predeterminados")
+    @GetMapping("/{id}")
+    public ResponseEntity<Jutsu> getJutsuById(@PathVariable Long id) {
+
+        Optional<Jutsu> opt = jutsuRepository.findById(id);
+
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+    }
+
+    @GetMapping("/predeterminados")
     public void jutsusPredeterminados() {
 
-        /// Kiri
+
         jutsuRepository.save(Jutsu.builder().name("Clon de Niebla").build());
         jutsuRepository.save(Jutsu.builder().name("Shurikens de Niebla").build());
         jutsuRepository.save(Jutsu.builder().name("Espada de Agua").build());
@@ -42,8 +50,6 @@ public class JutsuController {
         jutsuRepository.save(Jutsu.builder().name("Agujas de Niebla").build());
         jutsuRepository.save(Jutsu.builder().name("Paso del Dios Niebla").build());
         jutsuRepository.save(Jutsu.builder().name("Fusión Total de la Niebla").build());
-
-        /// Konoha
 
         jutsuRepository.save(Jutsu.builder().name("Máxima Técnica de Taijutsu de la Aldea Oculta de la Hoja").build());
         jutsuRepository.save(Jutsu.builder().name("Corriente de la Hoja").build());
@@ -63,8 +69,6 @@ public class JutsuController {
         jutsuRepository.save(Jutsu.builder().name("Sello de la Pared de Hierro").build());
         jutsuRepository.save(Jutsu.builder().name("Manipulación de Técnicas").build());
         jutsuRepository.save(Jutsu.builder().name("Ninpō: Shisekiyōjin").build());
-
-        /// Suna
 
         jutsuRepository.save(Jutsu.builder().name("Suna Moji").build());
         jutsuRepository.save(Jutsu.builder().name("Noroi no Suna Ningyou no Jutsu").build());

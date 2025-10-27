@@ -3,6 +3,8 @@ package org.jramirezdfernandez.monolitonaruto.mision;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.jramirezdfernandez.monolitonaruto.exportacion.ElementToVisit;
+import org.jramirezdfernandez.monolitonaruto.exportacion.VisitorFormato;
 import org.jramirezdfernandez.monolitonaruto.ninja.Ninja;
 
 @Entity
@@ -13,7 +15,7 @@ import org.jramirezdfernandez.monolitonaruto.ninja.Ninja;
 @Builder
 
 @Table(name="t_mision")
-public class Mision {
+public class Mision implements ElementToVisit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,4 +33,9 @@ public class Mision {
     private Ninja ninja;
 
 
+    @Override
+    public byte[] aceptarExportarFormato(VisitorFormato formato) {
+
+        return formato.exportarMision(this);
+    }
 }

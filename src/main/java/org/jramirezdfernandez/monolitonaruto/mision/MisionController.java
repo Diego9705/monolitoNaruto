@@ -1,16 +1,19 @@
 package org.jramirezdfernandez.monolitonaruto.mision;
 
-import org.jramirezdfernandez.monolitonaruto.jutsus.Jutsu;
-import org.jramirezdfernandez.monolitonaruto.jutsus.JutsuRepository;
+import org.jramirezdfernandez.monolitonaruto.exportacion.ExportacionService;
+import org.jramirezdfernandez.monolitonaruto.exportacion.VisitorFormato;
 import org.jramirezdfernandez.monolitonaruto.ninja.Ninja;
 import org.jramirezdfernandez.monolitonaruto.ninja.NinjaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 
 @CrossOrigin
@@ -30,8 +33,11 @@ public class MisionController {
 
     private final MisionService misionService;
 
-    public MisionController(MisionService misionService) {
+    private final ExportacionService exportacionService;
+
+    public MisionController(MisionService misionService, ExportacionService exportacionService) {
         this.misionService = misionService;
+        this.exportacionService = exportacionService;
     }
 
     @GetMapping
@@ -39,11 +45,12 @@ public class MisionController {
         return misionRepository.findAll();
     }
     @GetMapping("/{id}")
-    public Mision getMisionById(@PathVariable Long id) {
-        return misionRepository.findById(id).get();
+    public ResponseEntity<Mision> getMisionById(@PathVariable Long id) {
+        Optional<Mision> opt = misionRepository.findById(id);
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/crear/predeterminados")
+    @GetMapping("/predeterminados")
     public void misionesPredeterminados() {
         misionRepository.save(Mision.builder().name("Exploración").rank("D").recompensa(10).requisitorango("Genin").build());
         misionRepository.save(Mision.builder().name("Recopilación de datos").rank("C").recompensa(15).requisitorango("Genin").build());
@@ -52,16 +59,50 @@ public class MisionController {
         misionRepository.save(Mision.builder().name("Batalla").rank("S").recompensa(30).requisitorango("Jonin").build());
     }
 
+
+    @GetMapping("/{id_mision}/{opcion}")
+    public ResponseEntity<byte[]> exportarNinja(@PathVariable Long id_mision,@PathVariable Integer opcion) throws IOException {
+        Mision mision = misionRepository.findById(id_mision).get();
+
+        ArrayList<Object> propiedades = exportacionService.obtenerPropiedadesExportar(opcion);
+
+        byte[] fileContent = mision.aceptarExportarFormato((VisitorFormato) propiedades.get(0));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, (String) propiedades.get(1))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + mision.getName() + propiedades.get(2) + "\"")
+                .body(fileContent);
+    }
+
+
     @PostMapping
     public Mision createMision (@RequestBody Mision mision) {
         return misionRepository.save(mision);
     }
 
-    @PutMapping("/conectarmn/{id_mision}/{id_ninja}")
+    @PatchMapping
+    public Mision modificarMision(@RequestBody Mision mision) {
+
+        Mision baseMision = misionRepository.findById(mision.getId()).get();
+
+        mision.setNinja(baseMision.getNinja());
+
+        return misionRepository.save(mision);
+    }
+
+
+
+
+    @PatchMapping("/{id_mision}/{id_ninja}")
     public ResponseEntity<Mision> conectarNinja(@PathVariable Long id_mision, @PathVariable Long id_ninja) {
 
 
         Mision mision =  misionRepository.findById(id_mision).get();
+
+        if (mision.getNinja() != null){
+            return ResponseEntity.badRequest().build();
+        }
+
         Ninja ninja =  ninjaRepository.findById(id_ninja).get();
 
         boolean validacion = misionService.validarRango(mision.getRequisitorango(),ninja.getRank());

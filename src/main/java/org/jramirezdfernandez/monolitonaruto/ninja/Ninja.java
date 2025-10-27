@@ -5,7 +5,9 @@ package org.jramirezdfernandez.monolitonaruto.ninja;
 import jakarta.persistence.*;
 import lombok.*;
 import org.jramirezdfernandez.monolitonaruto.aldea.Aldea;
-import org.jramirezdfernandez.monolitonaruto.jutsus.Jutsu;
+import org.jramirezdfernandez.monolitonaruto.exportacion.ElementToVisit;
+import org.jramirezdfernandez.monolitonaruto.exportacion.VisitorFormato;
+import org.jramirezdfernandez.monolitonaruto.jutsu.Jutsu;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
 @Builder
 
 @Table(name ="t_ninjas")
-public class Ninja {
+public class Ninja implements ElementToVisit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,4 +50,8 @@ public class Ninja {
     private List<Jutsu> jutsus;
 
 
+    @Override
+    public byte[] aceptarExportarFormato(VisitorFormato formato) {
+        return formato.exportarNinja(this);
+    }
 }
