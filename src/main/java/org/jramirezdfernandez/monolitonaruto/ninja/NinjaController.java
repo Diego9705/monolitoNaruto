@@ -76,7 +76,6 @@ public class NinjaController {
 
         Ninja baseNinja = ninjaRepository.findById(ninja.getId()).get();
 
-        ninja.setAldea(baseNinja.getAldea());
         ninja.setJutsus(baseNinja.getJutsus());
         return ninjaRepository.save(ninja);
     }

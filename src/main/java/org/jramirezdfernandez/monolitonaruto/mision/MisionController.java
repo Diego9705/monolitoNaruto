@@ -61,17 +61,16 @@ public class MisionController {
 
 
     @GetMapping("/{id_mision}/{opcion}")
-    public ResponseEntity<byte[]> exportarNinja(@PathVariable Long id_mision,@PathVariable Integer opcion) throws IOException {
-        Mision mision = misionRepository.findById(id_mision).get();
+    public ResponseEntity<byte[]> exportarMision(@PathVariable Long id_mision,@PathVariable Integer opcion) throws IOException {
+        Optional<Mision> misionVerificar = misionRepository.findById(id_mision);
 
-        ArrayList<Object> propiedades = exportacionService.obtenerPropiedadesExportar(opcion);
+        if (misionVerificar.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-        byte[] fileContent = mision.aceptarExportarFormato((VisitorFormato) propiedades.get(0));
+        Mision mision = misionVerificar.get();
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(HttpHeaders.CONTENT_TYPE, (String) propiedades.get(1))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + mision.getName() + propiedades.get(2) + "\"")
-                .body(fileContent);
+        return exportacionService.exportar(mision,opcion);
     }
 
 
