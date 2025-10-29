@@ -1,23 +1,31 @@
 package org.jramirezdfernandez.monolitonaruto.ninja;
 
 
+import org.hibernate.ObjectNotFoundException;
+import org.jramirezdfernandez.monolitonaruto.aldea.Aldea;
 import org.jramirezdfernandez.monolitonaruto.aldea.AldeaRepository;
 import org.jramirezdfernandez.monolitonaruto.exportacion.ExportacionService;
 import org.jramirezdfernandez.monolitonaruto.exportacion.FormatoJSON;
 import org.jramirezdfernandez.monolitonaruto.exportacion.VisitorFormato;
 import org.jramirezdfernandez.monolitonaruto.jutsu.Jutsu;
 import org.jramirezdfernandez.monolitonaruto.jutsu.JutsuRepository;
+import org.jramirezdfernandez.monolitonaruto.mision.Mision;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static java.lang.System.in;
 
 @CrossOrigin
 @RestController
@@ -44,83 +52,142 @@ public class NinjaController {
     public List<Ninja> getAllNinjas() {
         return ninjaRepository.findAll();
     }
+
+
     @GetMapping("/{id}")
-    public Ninja getNinjaById(@PathVariable Long id) {
-        return ninjaRepository.findById(id).get();
+    public ResponseEntity<Ninja> getNinjaById(@PathVariable Long id) {
+
+        Optional<Ninja> ninjaValidacion = ninjaRepository.findById(id);
+
+        return ninjaValidacion.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
     }
 
 
     @GetMapping("/{id_ninja}/{opcion}")
     public ResponseEntity<byte[]> exportarNinja(@PathVariable Long id_ninja,@PathVariable Integer opcion) throws IOException {
-        Ninja ninja = ninjaRepository.findById(id_ninja).get();
+        Optional<Ninja> ninjaVerificar = ninjaRepository.findById(id_ninja);
 
-        ArrayList<Object> propiedades = exportacionService.obtenerPropiedadesExportar(opcion);
+        if (ninjaVerificar.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-        byte[] fileContent = ninja.aceptarExportarFormato((VisitorFormato) propiedades.get(0));
+        Ninja ninja = ninjaVerificar.get();
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(HttpHeaders.CONTENT_TYPE, (String) propiedades.get(1))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + ninja.getName() + propiedades.get(2) + "\"")
-                .body(fileContent);
+        return exportacionService.exportar(ninja,opcion);
     }
 
 
     @PostMapping
-    public Ninja createNinja(@RequestBody Ninja ninja) {
-        return ninjaRepository.save(ninja);
+    public ResponseEntity<Ninja> createNinja(@RequestBody Ninja ninja) {
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(ninja.getId()).toUri();
+
+        ninjaRepository.save(ninja);
+
+        return ResponseEntity.created(location).build();
+
     }
 
 
     @PatchMapping
-    public Ninja modificarNinja(@RequestBody Ninja ninja) {
+    public ResponseEntity<Ninja> modificarNinja(@RequestBody Ninja ninja) {
 
-        Ninja baseNinja = ninjaRepository.findById(ninja.getId()).get();
+        Optional<Ninja> ninjaValidacion = ninjaRepository.findById(ninja.getId());
+
+        if (ninjaValidacion.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+
+        Ninja baseNinja = ninjaValidacion.get();
 
         ninja.setJutsus(baseNinja.getJutsus());
-        return ninjaRepository.save(ninja);
+        ninjaRepository.save(ninja);
+
+        return ResponseEntity.ok(baseNinja);
     }
 
     @PatchMapping("/conectarnj/{id_ninja}/{id_jutsu}")
-    public Ninja conectarJutsu(@PathVariable Long id_ninja, @PathVariable Long id_jutsu) {
+    public ResponseEntity<Ninja> conectarJutsu(@PathVariable Long id_ninja, @PathVariable Long id_jutsu) {
 
-        Ninja ninja =  ninjaRepository.findById(id_ninja).get();
-        Jutsu jutsu =  jutsuRepository.findById(id_jutsu).get();
+        Optional<Ninja> ninjaValidacion = ninjaRepository.findById(id_ninja);
 
-        if (ninja.getJutsus()==null) {
-            List<Jutsu> lista = new ArrayList<>();
-            lista.add(jutsu);
-            ninja.setJutsus(lista);
-            return ninjaRepository.save(ninja);
+        if (ninjaValidacion.isEmpty()){
+            return ResponseEntity.notFound().build();
         }
 
-        List<Jutsu> jutsus = ninja.getJutsus();
+        Optional<Jutsu> jutsuValidacion = jutsuRepository.findById(id_jutsu);
 
-        jutsus.add(jutsu);
+        if (jutsuValidacion.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
 
-        ninja.setJutsus(jutsus);
 
-        return ninjaRepository.save(ninja);
+        Ninja ninja =  ninjaValidacion.get();
+
+        Jutsu jutsu =  jutsuValidacion.get();
+
+        List<Jutsu> lista;
+
+        if (ninja.getJutsus().contains(jutsu) ){
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        if (ninja.getJutsus().isEmpty()) {
+            lista = new ArrayList<>();
+            lista.add(jutsu);
+        }
+        else {
+            lista = ninja.getJutsus();
+            lista.add(jutsu);
+        }
+
+        ninja.setJutsus(lista);
+
+        ninjaRepository.save(ninja);
+
+        return ResponseEntity.ok(ninja);
     }
 
     @PatchMapping("/conectarna/{id_ninja}/{id_aldea}")
-    public Ninja conectarAldea(@PathVariable Long id_ninja, @PathVariable Long id_aldea) {
+    public ResponseEntity<Ninja> conectarAldea(@PathVariable Long id_ninja, @PathVariable Long id_aldea) {
 
-        Ninja ninja =  ninjaRepository.findById(id_ninja).get();
+        Optional<Ninja> ninjaValidacion = ninjaRepository.findById(id_ninja);
 
-        ninja.setAldea(aldeaRepository.findById(id_aldea).get());
+        if (ninjaValidacion.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
 
-        return ninjaRepository.save(ninja);
+        Optional<Aldea> aldeaValidacion = aldeaRepository.findById(id_aldea);
+
+        if (aldeaValidacion.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        Ninja ninja =  ninjaValidacion.get();
+
+        ninja.setAldea(aldeaValidacion.get());
+
+        ninjaRepository.save(ninja);
+
+        return ResponseEntity.ok(ninja);
+
     }
 
 
 
     @DeleteMapping("/{id}")
-    public void eliminarNinja(@PathVariable Long id) {
-        ninjaRepository.deleteById(id);
+    public ResponseEntity<Void> eliminarNinja(@PathVariable Long id) {
 
+        try{
+            ninjaRepository.deleteById(id);
+            return  ResponseEntity.noContent().build();
+
+        } catch (ObjectNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
-
-
 
 
 

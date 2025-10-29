@@ -26,7 +26,7 @@ public class FormatoJSON extends VisitorFormato {
             if (j != null) {
                 for (int k = 0; k < j.size(); k++) {
                     if (k > 0) sb.append(",");
-                    sb.append("\"").append(escJson(j.get(k).getName())).append("\"");
+                    sb.append(escJson(j.get(k).getName()));
                 }
             }
             sb.append("]");

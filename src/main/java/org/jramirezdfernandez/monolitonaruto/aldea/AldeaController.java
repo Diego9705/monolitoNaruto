@@ -5,7 +5,9 @@ import org.jramirezdfernandez.monolitonaruto.jutsu.Jutsu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +40,13 @@ public class AldeaController {
     }
 
     @PostMapping
-    public Aldea createAldea(@RequestBody Aldea aldea) {
-        return aldeaRepository.save(aldea);
+    public ResponseEntity<Aldea> createAldea(@RequestBody Aldea aldea) {
+
+        aldeaRepository.save(aldea);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(aldea.getId()).toUri();
+
+        return ResponseEntity.created(location).build();
+
     }
 }

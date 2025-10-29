@@ -1,17 +1,16 @@
 package org.jramirezdfernandez.monolitonaruto.mision;
 
+import org.hibernate.ObjectNotFoundException;
 import org.jramirezdfernandez.monolitonaruto.exportacion.ExportacionService;
-import org.jramirezdfernandez.monolitonaruto.exportacion.VisitorFormato;
 import org.jramirezdfernandez.monolitonaruto.ninja.Ninja;
 import org.jramirezdfernandez.monolitonaruto.ninja.NinjaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,9 +19,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/misiones")
 public class MisionController {
-
-
-
 
     @Autowired
     private MisionRepository misionRepository;
@@ -75,34 +71,55 @@ public class MisionController {
 
 
     @PostMapping
-    public Mision createMision (@RequestBody Mision mision) {
-        return misionRepository.save(mision);
+    public ResponseEntity<Mision> createMision (@RequestBody Mision mision) {
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(mision.getId()).toUri();
+
+        misionRepository.save(mision);
+
+        return ResponseEntity.created(location).build();
     }
 
     @PatchMapping
-    public Mision modificarMision(@RequestBody Mision mision) {
+    public ResponseEntity<Mision> modificarMision(@RequestBody Mision mision) {
 
-        Mision baseMision = misionRepository.findById(mision.getId()).get();
+        Optional<Mision> baseMision = misionRepository.findById(mision.getId());
 
-        mision.setNinja(baseMision.getNinja());
+        if (baseMision.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-        return misionRepository.save(mision);
+        mision.setNinja(baseMision.get().getNinja());
+        misionRepository.save(mision);
+
+        return ResponseEntity.ok(mision);
+
     }
-
-
 
 
     @PatchMapping("/{id_mision}/{id_ninja}")
     public ResponseEntity<Mision> conectarNinja(@PathVariable Long id_mision, @PathVariable Long id_ninja) {
 
 
-        Mision mision =  misionRepository.findById(id_mision).get();
+        Optional<Mision> misionValidacion =  misionRepository.findById(id_mision);
 
-        if (mision.getNinja() != null){
+        if (misionValidacion.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+
+        if (misionValidacion.get().getNinja() != null){
             return ResponseEntity.badRequest().build();
         }
 
-        Ninja ninja =  ninjaRepository.findById(id_ninja).get();
+        Optional<Ninja> ninjaValidacion =  ninjaRepository.findById(id_ninja);
+
+        if (ninjaValidacion.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Mision mision = misionValidacion.get();
+        Ninja ninja = ninjaValidacion.get();
 
         boolean validacion = misionService.validarRango(mision.getRequisitorango(),ninja.getRank());
 
@@ -117,8 +134,14 @@ public class MisionController {
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarMision(@PathVariable Long id) {
-        ninjaRepository.deleteById(id);
+    public ResponseEntity<Void> eliminarMision(@PathVariable Long id) {
+        try{
+            misionRepository.deleteById(id);
+            return  ResponseEntity.noContent().build();
+
+        } catch (ObjectNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

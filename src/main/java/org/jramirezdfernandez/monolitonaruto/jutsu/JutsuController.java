@@ -1,9 +1,12 @@
 package org.jramirezdfernandez.monolitonaruto.jutsu;
 
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,8 +89,13 @@ public class JutsuController {
     }
 
     @PostMapping
-    public Jutsu createJutsu(@RequestBody Jutsu jutsu) {
-        return jutsuRepository.save(jutsu);
+    public ResponseEntity<Jutsu> createJutsu(@RequestBody Jutsu jutsu) {
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(jutsu.getId()).toUri();
+
+        jutsuRepository.save(jutsu);
+
+        return ResponseEntity.created(location).build();
     }
 
 }
