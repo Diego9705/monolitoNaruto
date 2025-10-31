@@ -1,6 +1,5 @@
 package org.jramirezdfernandez.monolitonaruto.jutsu;
 
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,24 +19,17 @@ public class JutsuController {
 
     @GetMapping
     public List<Jutsu> getAllJutsus() {
-
         return jutsuRepository.findAll();
-
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Jutsu> getJutsuById(@PathVariable Long id) {
-
         Optional<Jutsu> opt = jutsuRepository.findById(id);
-
         return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-
     }
 
     @GetMapping("/predeterminados")
     public void jutsusPredeterminados() {
-
-
         jutsuRepository.save(Jutsu.builder().name("Clon de Niebla").build());
         jutsuRepository.save(Jutsu.builder().name("Shurikens de Niebla").build());
         jutsuRepository.save(Jutsu.builder().name("Espada de Agua").build());
@@ -84,18 +76,12 @@ public class JutsuController {
         jutsuRepository.save(Jutsu.builder().name("Mōbaku Sajin: Noizui").build());
         jutsuRepository.save(Jutsu.builder().name("Sajin: Shīsā").build());
         jutsuRepository.save(Jutsu.builder().name("Barrera de tormenta de arena").build());
-
-
     }
 
     @PostMapping
     public ResponseEntity<Jutsu> createJutsu(@RequestBody Jutsu jutsu) {
-
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(jutsu.getId()).toUri();
-
-        jutsuRepository.save(jutsu);
-
-        return ResponseEntity.created(location).build();
+        Jutsu savedJutsu = jutsuRepository.save(jutsu); // Guarda y obtén el ID
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedJutsu.getId()).toUri();
+        return ResponseEntity.created(location).body(savedJutsu); // Devuelve el objeto creado
     }
-
 }

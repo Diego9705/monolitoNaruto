@@ -1,7 +1,5 @@
 package org.jramirezdfernandez.monolitonaruto.aldea;
 
-
-import org.jramirezdfernandez.monolitonaruto.jutsu.Jutsu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +22,9 @@ public class AldeaController {
         return aldeaRepository.findAll();
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Aldea> getAldeaById(@PathVariable Long id) {
         Optional<Aldea> opt = aldeaRepository.findById(id);
-
         return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -41,12 +37,8 @@ public class AldeaController {
 
     @PostMapping
     public ResponseEntity<Aldea> createAldea(@RequestBody Aldea aldea) {
-
-        aldeaRepository.save(aldea);
-
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(aldea.getId()).toUri();
-
-        return ResponseEntity.created(location).build();
-
+        Aldea savedAldea = aldeaRepository.save(aldea); // Guarda y obtén el ID
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedAldea.getId()).toUri();
+        return ResponseEntity.created(location).body(savedAldea); // Devuelve el objeto creado
     }
 }
