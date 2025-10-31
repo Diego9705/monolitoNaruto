@@ -137,7 +137,15 @@ function NinjasPage() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `ninja_${ninjaId}.${option === 1 ? 'json' : 'xml'}`);
+            let extension;
+            if (option === 1) {
+                extension = 'json';
+            } else if (option === 2) {
+                extension = 'txt';
+            } else if (option === 3) {
+                extension = 'xml';
+            }
+            link.setAttribute('download', `ninja_${ninjaId}.${extension}`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -215,16 +223,16 @@ function NinjasPage() {
                 <ul className="entity-list">
                     {ninjas.map((ninja) => (
                         <li key={ninja.id}>
-                            ID: {ninja.id} - Nombre: {ninja.name} - Rango: {ninja.rank} - Edad: {ninja.age} - Ataque: {ninja.attack} - Defensa: {ninja.defense} - Chakra: {ninja.chakra}
-                            {ninja.aldea && <span> - Aldea: {ninja.aldea.name}</span>}
-                            {ninja.jutsus && ninja.jutsus.length > 0 && (
-                                <span> - Jutsus: {ninja.jutsus.map(j => j.name).join(', ')}</span>
-                            )}
+                            ID: {ninja.id} - Nombre: {ninja.name} - Rango: {ninja.rank} - Ataque: {ninja.atk} - Defensa: {ninja.def} - Chakra: {ninja.chakra} - Aldea: {ninja.aldea} -
+                            {
+                                <span> - Jutsus: {ninja.jutsus.join(', ')}</span>
+                            }
                             <div className="actions">
                                 <button onClick={() => setEditNinjaData(ninja)}>Editar</button>
                                 <button onClick={() => handleDeleteNinja(ninja.id)} className="delete-button">Eliminar</button>
                                 <button onClick={() => handleExportNinja(ninja.id, 1)}>Exportar JSON</button>
-                                <button onClick={() => handleExportNinja(ninja.id, 2)}>Exportar XML</button>
+                                <button onClick={() => handleExportNinja(ninja.id, 2)}>Exportar TXT</button>
+                                <button onClick={() => handleExportNinja(ninja.id, 3)}>Exportar XML</button>
                             </div>
                         </li>
                     ))}

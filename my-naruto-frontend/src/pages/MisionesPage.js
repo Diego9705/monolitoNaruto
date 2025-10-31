@@ -117,7 +117,15 @@ function MisionesPage() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `mision_${misionId}.${option === 1 ? 'json' : 'xml'}`);
+            let extension;
+            if (option === 1) {
+                extension = 'json';
+            } else if (option === 2) {
+                extension = 'txt';
+            } else if (option === 3) {
+                extension = 'xml';
+            }
+            link.setAttribute('download', `mision_${misionId}.${extension}`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -179,13 +187,13 @@ function MisionesPage() {
                 <ul className="entity-list">
                     {misiones.map((mision) => (
                         <li key={mision.id}>
-                            ID: {mision.id} - Nombre: {mision.name} - Rango: {mision.rank} - Recompensa: {mision.recompensa} - Requisito Rango: {mision.requisitorango}
-                            {mision.ninja && <span> - Ninja Asignado: {mision.ninja.name} (Rango: {mision.ninja.rank})</span>}
+                            ID: {mision.id} - Nombre: {mision.name} - Rango: {mision.rank} - Recompensa: {mision.recompensa} - Requisito Rango: {mision.requisitorango} - Ninja Asignado: {mision.ninja}
                             <div className="actions">
                                 <button onClick={() => setEditMisionData(mision)}>Editar</button>
                                 <button onClick={() => handleDeleteMision(mision.id)} className="delete-button">Eliminar</button>
                                 <button onClick={() => handleExportMision(mision.id, 1)}>Exportar JSON</button>
-                                <button onClick={() => handleExportMision(mision.id, 2)}>Exportar XML</button>
+                                <button onClick={() => handleExportMision(mision.id, 2)}>Exportar TXT</button>
+                                <button onClick={() => handleExportMision(mision.id, 3)}>Exportar XML</button>
                             </div>
                         </li>
                     ))}
