@@ -34,23 +34,27 @@ public class NinjaController {
 
     private final ExportacionService exportacionService;
 
-    public NinjaController(ExportacionService exportacionService) {
+    private final NinjaMapper ninjaMapper;
+
+    public NinjaController(ExportacionService exportacionService, NinjaMapper ninjaMapper) {
         this.exportacionService = exportacionService;
+        this.ninjaMapper = ninjaMapper;
     }
 
 
     @GetMapping
-    public List<Ninja> getAllNinjas() {
-        return ninjaRepository.findAll();
+    public List<NinjaDTO> getAllNinjas() {
+        List<Ninja> ninjas = ninjaRepository.findAll();
+        return ninjas.stream().map(ninjaMapper::ninjaToNinjaDto).toList();
+
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Ninja> getNinjaById(@PathVariable Long id) {
+    public ResponseEntity<NinjaDTO> getNinjaById(@PathVariable Long id) {
 
         Optional<Ninja> ninjaValidacion = ninjaRepository.findById(id);
 
-        return ninjaValidacion.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ninjaValidacion.map(ninja ->  ResponseEntity.ok(ninjaMapper.ninjaToNinjaDto(ninja))).orElseGet(() -> ResponseEntity.notFound().build());
 
     }
 
