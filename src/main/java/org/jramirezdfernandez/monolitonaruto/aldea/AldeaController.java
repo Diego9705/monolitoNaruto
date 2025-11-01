@@ -37,8 +37,8 @@ public class AldeaController {
 
     @PostMapping
     public ResponseEntity<Aldea> createAldea(@RequestBody Aldea aldea) {
-        Aldea savedAldea = aldeaRepository.save(aldea); // Guarda y obtén el ID
+        Aldea savedAldea = aldeaRepository.save(aldea);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedAldea.getId()).toUri();
-        return ResponseEntity.created(location).body(savedAldea); // Devuelve el objeto creado
+        return ResponseEntity.created(location).body(savedAldea);
     }
 }

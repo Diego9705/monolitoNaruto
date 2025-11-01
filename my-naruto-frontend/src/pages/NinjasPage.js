@@ -204,7 +204,7 @@ function NinjasPage() {
                     <option value="">Selecciona Ninja</option>
                     {ninjas.map((ninja) => (
                         <option key={ninja.id} value={ninja.id}>
-                            {ninja.name} (ID: {ninja.id}) - Aldea: {ninja.aldea ? ninja.aldea.name : 'Ninguna'}
+                            {ninja.name} (ID: {ninja.id}) - Aldea: {ninja.aldea}
                         </option>
                     ))}
                 </select>
@@ -226,7 +226,7 @@ function NinjasPage() {
                 <ul className="entity-list">
                     {filteredNinjas.map((ninja) => (
                         <li key={ninja.id}>
-                            ID: {ninja.id} - Nombre: {ninja.name} - Rango: {ninja.rank} - Ataque: {ninja.atk} - Defensa: {ninja.def} - Chakra: {ninja.chakra} - Aldea: {ninja.aldea ? ninja.aldea.name : 'Ninguna'} -
+                            ID: {ninja.id} - Nombre: {ninja.name} - Rango: {ninja.rank} - Ataque: {ninja.atk} - Defensa: {ninja.def} - Chakra: {ninja.chakra} - Aldea: {ninja.aldea} -
                             <span> Jutsus: {ninja.jutsus ? ninja.jutsus.join(', ') : ''}</span>
                             <div className="actions">
                                 <button onClick={() => setEditNinjaData(ninja)}>Editar</button>

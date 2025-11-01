@@ -6,7 +6,7 @@ function AldeaForm({ onSubmit, initialData = {}, buttonText = 'Crear Aldea' }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit({ name });
-        setName(''); // Limpiar formulario después de enviar
+        setName('');
     };
 
     return (

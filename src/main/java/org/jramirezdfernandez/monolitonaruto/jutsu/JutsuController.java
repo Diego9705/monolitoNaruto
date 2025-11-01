@@ -80,8 +80,8 @@ public class JutsuController {
 
     @PostMapping
     public ResponseEntity<Jutsu> createJutsu(@RequestBody Jutsu jutsu) {
-        Jutsu savedJutsu = jutsuRepository.save(jutsu); // Guarda y obtén el ID
+        Jutsu savedJutsu = jutsuRepository.save(jutsu);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedJutsu.getId()).toUri();
-        return ResponseEntity.created(location).body(savedJutsu); // Devuelve el objeto creado
+        return ResponseEntity.created(location).body(savedJutsu);
     }
 }

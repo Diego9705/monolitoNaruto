@@ -15,6 +15,6 @@ public class NinjaDTO {
     private Integer atk;
     private Integer def;
     private Integer chakra;
-    private Aldea aldea;
+    private String aldea;
     private List<String> jutsus;
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// ACEPTA 'ninjas' como prop
 function MisionForm({ onSubmit, initialData = {}, buttonText = 'Crear Misión', ninjas = [] }) {
     const [name, setName] = useState(initialData.name || '');
     const [rank, setRank] = useState(initialData.rank || 'D');
@@ -18,7 +17,6 @@ function MisionForm({ onSubmit, initialData = {}, buttonText = 'Crear Misión', 
             setSelectedNinjaId(initialData.ninja ? initialData.ninja.id.toString() : '');
             setPrevId(initialData.id);
         }
-        // Si es creación, el clear se hace al enviar, no aquí
     }, [initialData, prevId]);
 
     const handleSubmit = (e) => {
