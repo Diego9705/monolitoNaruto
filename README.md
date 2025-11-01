@@ -7,5 +7,7 @@ docker-compose up --build
 cd my-naruto-frontend
 
 npm install axios
+
 npm install
+
 npm start
