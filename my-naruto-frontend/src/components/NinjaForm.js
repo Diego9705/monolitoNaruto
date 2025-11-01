@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-// ACEPTA 'aldeas' como prop
 function NinjaForm({ onSubmit, initialData = {}, buttonText = 'Crear Ninja', aldeas = [] }) {
     const [name, setName] = useState(initialData.name || '');
     const [rank, setRank] = useState(initialData.rank || 'Genin');
-    const [age, setAge] = useState(initialData.age || 0);
-    const [attack, setAttack] = useState(initialData.attack || 0);
-    const [defense, setDefense] = useState(initialData.defense || 0);
+    const [atk, setAtk] = useState(initialData.atk || 0);
+    const [def, setDef] = useState(initialData.def || 0);
     const [chakra, setChakra] = useState(initialData.chakra || 0);
     const [selectedAldeaId, setSelectedAldeaId] = useState('');
     const [prevId, setPrevId] = useState(initialData.id);
@@ -15,14 +13,12 @@ function NinjaForm({ onSubmit, initialData = {}, buttonText = 'Crear Ninja', ald
         if (initialData && initialData.id && initialData.id !== prevId) {
             setName(initialData.name || '');
             setRank(initialData.rank || 'Genin');
-            setAge(initialData.age || 0);
-            setAttack(initialData.attack || 0);
-            setDefense(initialData.defense || 0);
+            setAtk(initialData.atk || 0);
+            setDef(initialData.def || 0);
             setChakra(initialData.chakra || 0);
             setSelectedAldeaId(initialData.aldea ? initialData.aldea.id.toString() : '');
             setPrevId(initialData.id);
         }
-        // Si no hay edición nueva, los clears los hace el submit
     }, [initialData, prevId]);
 
     const handleSubmit = (e) => {
@@ -32,9 +28,8 @@ function NinjaForm({ onSubmit, initialData = {}, buttonText = 'Crear Ninja', ald
                 id: initialData.id,
                 name,
                 rank,
-                age: parseInt(age),
-                attack: parseInt(attack),
-                defense: parseInt(defense),
+                atk: parseInt(atk),
+                def: parseInt(def),
                 chakra: parseInt(chakra)
             },
             selectedAldeaId
@@ -42,9 +37,8 @@ function NinjaForm({ onSubmit, initialData = {}, buttonText = 'Crear Ninja', ald
         if (!initialData.id) {
             setName('');
             setRank('Genin');
-            setAge(0);
-            setAttack(0);
-            setDefense(0);
+            setAtk(0);
+            setDef(0);
             setChakra(0);
             setSelectedAldeaId('');
             setPrevId(null);
@@ -64,7 +58,6 @@ function NinjaForm({ onSubmit, initialData = {}, buttonText = 'Crear Ninja', ald
             <label>
                 Rango:
                 <select value={rank} onChange={(e) => setRank(e.target.value)}>
-                    <option selected disabled>Rango</option>
                     <option value="Genin">Genin</option>
                     <option value="Chunin">Chunin</option>
                     <option value="Jonin">Jonin</option>
@@ -73,15 +66,15 @@ function NinjaForm({ onSubmit, initialData = {}, buttonText = 'Crear Ninja', ald
             <input
                 type="number"
                 placeholder="Ataque"
-                value={attack}
-                onChange={(e) => setAttack(e.target.value)}
+                value={atk}
+                onChange={(e) => setAtk(e.target.value)}
                 required
             />
             <input
                 type="number"
                 placeholder="Defensa"
-                value={defense}
-                onChange={(e) => setDefense(e.target.value)}
+                value={def}
+                onChange={(e) => setDef(e.target.value)}
                 required
             />
             <input

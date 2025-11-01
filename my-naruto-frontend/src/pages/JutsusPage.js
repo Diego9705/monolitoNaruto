@@ -4,6 +4,7 @@ import JutsuForm from '../components/JutsuForm';
 
 function JutsusPage() {
     const [jutsus, setJutsus] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -45,12 +46,24 @@ function JutsusPage() {
         }
     };
 
+    const filteredJutsus = jutsus.filter(jutsu =>
+        jutsu.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     if (loading) return <div>Cargando jutsus...</div>;
     if (error) return <div className="error">{error}</div>;
 
     return (
         <div className="page-container">
             <h1>Gestión de Jutsus</h1>
+
+            <input
+                type="text"
+                placeholder="Buscar jutsu..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ marginBottom: '20px', padding: '10px', fontSize: '16px', width: '100%' }}
+            />
 
             <JutsuForm onSubmit={handleCreateJutsu} />
 
@@ -59,11 +72,11 @@ function JutsusPage() {
             </button>
 
             <h2>Lista de Jutsus</h2>
-            {jutsus.length === 0 ? (
+            {filteredJutsus.length === 0 ? (
                 <p>No hay jutsus creados aún.</p>
             ) : (
                 <ul className="entity-list">
-                    {jutsus.map((jutsu) => (
+                    {filteredJutsus.map((jutsu) => (
                         <li key={jutsu.id}>
                             ID: {jutsu.id} - Nombre: {jutsu.name}
                         </li>

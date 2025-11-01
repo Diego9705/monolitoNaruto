@@ -44,9 +44,8 @@ public class NinjaController {
 
     @GetMapping
     public List<NinjaDTO> getAllNinjas() {
-        List<Ninja> ninjas = ninjaRepository.findAll();
+        List<Ninja> ninjas = ninjaRepository.findAllWithAldea();
         return ninjas.stream().map(ninjaMapper::ninjaToNinjaDto).toList();
-
     }
 
     @GetMapping("/{id}")

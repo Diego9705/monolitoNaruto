@@ -9,6 +9,7 @@ function MisionesPage() {
     const [selectedMisionId, setSelectedMisionId] = useState('');
     const [selectedNinjaId, setSelectedNinjaId] = useState('');
     const [editMisionData, setEditMisionData] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -40,12 +41,9 @@ function MisionesPage() {
             const newMision = response.data;
 
             if (ninjaIdToAssign) {
-                // Asegurarse de que ninjaIdToAssign sea un número
                 const parsedNinjaId = parseInt(ninjaIdToAssign);
                 if (!isNaN(parsedNinjaId)) {
                     await misionesApi.connectNinjaToMision(newMision.id, parsedNinjaId);
-                } else {
-                    console.warn("ID de ninja no válido para asignación inicial:", ninjaIdToAssign);
                 }
             }
             fetchData();
@@ -117,14 +115,7 @@ function MisionesPage() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            let extension;
-            if (option === 1) {
-                extension = 'json';
-            } else if (option === 2) {
-                extension = 'txt';
-            } else if (option === 3) {
-                extension = 'xml';
-            }
+            let extension = option === 1 ? 'json' : option === 2 ? 'txt' : 'xml';
             link.setAttribute('download', `mision_${misionId}.${extension}`);
             document.body.appendChild(link);
             link.click();
@@ -136,6 +127,9 @@ function MisionesPage() {
         }
     };
 
+    const filteredMisiones = misiones.filter(mision =>
+        mision.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (loading) return <div>Cargando misiones...</div>;
     if (error) return <div className="error">{error}</div>;
@@ -143,6 +137,14 @@ function MisionesPage() {
     return (
         <div className="page-container">
             <h1>Gestión de Misiones</h1>
+
+            <input
+                type="text"
+                placeholder="Buscar misión..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ marginBottom: '20px', padding: '10px', fontSize: '16px', width: '100%' }}
+            />
 
             <MisionForm onSubmit={handleCreateMision} ninjas={ninjas} />
 
@@ -163,9 +165,9 @@ function MisionesPage() {
             <div className="connection-section">
                 <select value={selectedMisionId} onChange={(e) => setSelectedMisionId(e.target.value)}>
                     <option value="">Selecciona Misión</option>
-                    {misiones.map((mision) => (
+                    {filteredMisiones.map((mision) => (
                         <option key={mision.id} value={mision.id}>
-                            {mision.name} (ID: {mision.id}) - Ninja Asignado: {mision.ninja ? mision.ninja.name : 'Ninguno'}
+                            {mision.name} (ID: {mision.id}) - Ninja: {mision.ninja || 'Ninguno'}
                         </option>
                     ))}
                 </select>
@@ -181,13 +183,13 @@ function MisionesPage() {
             </div>
 
             <h2>Lista de Misiones</h2>
-            {misiones.length === 0 ? (
+            {filteredMisiones.length === 0 ? (
                 <p>No hay misiones creadas aún.</p>
             ) : (
                 <ul className="entity-list">
-                    {misiones.map((mision) => (
+                    {filteredMisiones.map((mision) => (
                         <li key={mision.id}>
-                            ID: {mision.id} - Nombre: {mision.name} - Rango: {mision.rank} - Recompensa: {mision.recompensa} - Requisito Rango: {mision.requisitorango} - Ninja Asignado: {mision.ninja}
+                            ID: {mision.id} - Nombre: {mision.name} - Rango: {mision.rank} - Recompensa: {mision.recompensa} - Requisito Rango: {mision.requisitorango} - Ninja: {mision.ninja}
                             <div className="actions">
                                 <button onClick={() => setEditMisionData(mision)}>Editar</button>
                                 <button onClick={() => handleDeleteMision(mision.id)} className="delete-button">Eliminar</button>

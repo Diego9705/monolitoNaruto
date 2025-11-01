@@ -1,27 +1,22 @@
 package org.jramirezdfernandez.monolitonaruto.ninja;
 
-import org.jramirezdfernandez.monolitonaruto.aldea.Aldea;
-import org.jramirezdfernandez.monolitonaruto.jutsu.Jutsu;
-import org.jramirezdfernandez.monolitonaruto.mision.Mision;
-import org.jramirezdfernandez.monolitonaruto.mision.MisionDTO;
 import org.mapstruct.Mapper;
-
+import org.mapstruct.Mapping;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface NinjaMapper {
 
-    default String mapAldea(Aldea aldea) {
-        if (aldea == null) {
-            return null;
-        }
-        return aldea.getName();
-    }
-    default List<String> mapJutsu(List<Jutsu> jutsus){
-
-        return jutsus.stream().map(Jutsu::getName).toList();
-    }
-
-
+    @Mapping(target = "aldea", source = "aldea") // Mapea el objeto completo
+    @Mapping(target = "jutsus", expression = "java(ninja.getJutsus() != null ? ninja.getJutsus().stream().map(j -> j.getName()).toList() : java.util.Collections.emptyList())")
     NinjaDTO ninjaToNinjaDto(Ninja ninja);
+
+    // Métodos default para el mapeo de listas de jutsu
+    default List<String> mapJutsu(List<org.jramirezdfernandez.monolitonaruto.jutsu.Jutsu> jutsus) {
+        if (jutsus == null) {
+            return java.util.Collections.emptyList();
+        }
+        return jutsus.stream().map(jutsu -> jutsu.getName()).collect(Collectors.toList());
+    }
 }

@@ -4,6 +4,7 @@ import AldeaForm from '../components/AldeaForm';
 
 function AldeasPage() {
     const [aldeas, setAldeas] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -45,12 +46,24 @@ function AldeasPage() {
         }
     };
 
+    const filteredAldeas = aldeas.filter(aldea =>
+        aldea.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     if (loading) return <div>Cargando aldeas...</div>;
     if (error) return <div className="error">{error}</div>;
 
     return (
         <div className="page-container">
             <h1>Gestión de Aldeas</h1>
+
+            <input
+                type="text"
+                placeholder="Buscar aldea..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ marginBottom: '20px', padding: '10px', fontSize: '16px', width: '100%' }}
+            />
 
             <AldeaForm onSubmit={handleCreateAldea} />
 
@@ -59,11 +72,11 @@ function AldeasPage() {
             </button>
 
             <h2>Lista de Aldeas</h2>
-            {aldeas.length === 0 ? (
+            {filteredAldeas.length === 0 ? (
                 <p>No hay aldeas creadas aún.</p>
             ) : (
                 <ul className="entity-list">
-                    {aldeas.map((aldea) => (
+                    {filteredAldeas.map((aldea) => (
                         <li key={aldea.id}>
                             ID: {aldea.id} - Nombre: {aldea.name}
                         </li>

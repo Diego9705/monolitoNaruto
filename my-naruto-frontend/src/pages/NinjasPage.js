@@ -13,6 +13,7 @@ function NinjasPage() {
     const [selectedNinjaIdForAldea, setSelectedNinjaIdForAldea] = useState('');
     const [selectedAldeaId, setSelectedAldeaId] = useState('');
     const [editNinjaData, setEditNinjaData] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -46,12 +47,9 @@ function NinjasPage() {
             const newNinja = response.data;
 
             if (aldeaIdToAssign) {
-                // Asegurarse de que aldeaIdToAssign sea un número
                 const parsedAldeaId = parseInt(aldeaIdToAssign);
                 if (!isNaN(parsedAldeaId)) {
                     await ninjasApi.connectAldeaToNinja(newNinja.id, parsedAldeaId);
-                } else {
-                    console.warn("ID de aldea no válido para asignación inicial:", aldeaIdToAssign);
                 }
             }
             fetchData();
@@ -137,14 +135,7 @@ function NinjasPage() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            let extension;
-            if (option === 1) {
-                extension = 'json';
-            } else if (option === 2) {
-                extension = 'txt';
-            } else if (option === 3) {
-                extension = 'xml';
-            }
+            let extension = option === 1 ? 'json' : option === 2 ? 'txt' : 'xml';
             link.setAttribute('download', `ninja_${ninjaId}.${extension}`);
             document.body.appendChild(link);
             link.click();
@@ -156,12 +147,24 @@ function NinjasPage() {
         }
     };
 
+    const filteredNinjas = ninjas.filter(ninja =>
+        ninja.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     if (loading) return <div>Cargando ninjas...</div>;
     if (error) return <div className="error">{error}</div>;
 
     return (
         <div className="page-container">
             <h1>Gestión de Ninjas</h1>
+
+            <input
+                type="text"
+                placeholder="Buscar ninja..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ marginBottom: '20px', padding: '10px', fontSize: '16px', width: '100%' }}
+            />
 
             <NinjaForm onSubmit={handleCreateNinja} aldeas={aldeas} />
 
@@ -217,16 +220,14 @@ function NinjasPage() {
             </div>
 
             <h2>Lista de Ninjas</h2>
-            {ninjas.length === 0 ? (
+            {filteredNinjas.length === 0 ? (
                 <p>No hay ninjas creados aún.</p>
             ) : (
                 <ul className="entity-list">
-                    {ninjas.map((ninja) => (
+                    {filteredNinjas.map((ninja) => (
                         <li key={ninja.id}>
-                            ID: {ninja.id} - Nombre: {ninja.name} - Rango: {ninja.rank} - Ataque: {ninja.atk} - Defensa: {ninja.def} - Chakra: {ninja.chakra} - Aldea: {ninja.aldea} -
-                            {
-                                <span> - Jutsus: {ninja.jutsus.join(', ')}</span>
-                            }
+                            ID: {ninja.id} - Nombre: {ninja.name} - Rango: {ninja.rank} - Ataque: {ninja.atk} - Defensa: {ninja.def} - Chakra: {ninja.chakra} - Aldea: {ninja.aldea ? ninja.aldea.name : 'Ninguna'} -
+                            <span> Jutsus: {ninja.jutsus ? ninja.jutsus.join(', ') : ''}</span>
                             <div className="actions">
                                 <button onClick={() => setEditNinjaData(ninja)}>Editar</button>
                                 <button onClick={() => handleDeleteNinja(ninja.id)} className="delete-button">Eliminar</button>
